@@ -8,7 +8,7 @@
     <version>UNOFFICIAL</version>
 
     <properties>
-        <java.version>16</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <sonar.organization>guizhancraft</sonar.organization>
@@ -30,7 +30,7 @@
         </repository>
         <repository>
             <id>paper-repo</id>
-            <url>https://repo.destroystokyo.com/repository/maven-public/</url>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <repository>
             <id>spigot-repo</id>
@@ -42,7 +42,7 @@
         </repository>
         <repository>
             <id>CodeMC</id>
-            <url>https://repo.codemc.org/repository/maven-public/</url>
+            <url>https://repo.codemc.io/repository/maven-public/</url>
         </repository>
         <repository>
             <id>bg-repo</id>
@@ -113,19 +113,19 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.20.4-R0.1-SNAPSHOT</version>
+            <version>1.21.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>com.github.Slimefun</groupId>
-            <artifactId>Slimefun4</artifactId>
-            <version>RC-37</version>
+            <groupId>com.github.slimefun</groupId>
+            <artifactId>slimefun4</artifactId>
+            <version>experimental-5374034c87-1</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>io.github.baked-libs</groupId>
-                    <artifactId>dough</artifactId>
+                    <artifactId>dough-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -146,8 +146,8 @@
 
         <dependency>
             <groupId>net.guizhanss</groupId>
-            <artifactId>GuizhanLib-api</artifactId>
-            <version>1.8.1</version>
+            <artifactId>guizhanlib-all</artifactId>
+            <version>2.5.0</version>
             <scope>compile</scope>
         </dependency>
 

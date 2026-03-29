@@ -26,14 +26,19 @@ public class ChickenProduct {
     }
 
     @ParametersAreNonnullByDefault
-    public ChickenProduct(ItemStack product) {
-        if (product instanceof SlimefunItemStack sfProduct) {
-            this.name = sfProduct.getItemId();
-        } else {
-            this.name = product.getType().name().toUpperCase(Locale.ROOT);
-        }
-        this.product = product;
+    public ChickenProduct(String name, SlimefunItemStack product) {
+        this(name, product.clone().item());
+    }
 
+    @ParametersAreNonnullByDefault
+    public ChickenProduct(ItemStack product) {
+        this.name = product.getType().name().toUpperCase(Locale.ROOT);
+        this.product = product;
+    }
+
+    @ParametersAreNonnullByDefault
+    public ChickenProduct(SlimefunItemStack product) {
+        this(product.getItemId(), product);
     }
 
     @Nonnull
