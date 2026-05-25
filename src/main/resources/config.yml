@@ -1,3 +1,9 @@
+# Genetic Chickengineering configuration
+# Config version: 5
+# When this version changes, the plugin will back up your current config.yml
+# and replace it with the latest bundled file.
+config-version: 5
+
 options:
   # Enable auto update.
   auto-update: true
@@ -20,9 +26,11 @@ options:
   # Default: 30, Range: 1 ~ 100
   mutation-rate: 30
   # The percent chance that a chicken will produce an egg instead of a resource.
+  # You can override this per chicken below.
   # Default: 0, Range: 0 ~ 100
   resource-fail-rate: 0
   # The base time for resource generation (in seconds).
+  # You can override this per chicken below.
   # Default: 14, Range: 14 ~ 100
   resource-base-time: 14
   # Should the machines hurt the chickens.
@@ -47,6 +55,35 @@ options:
   # Default: 60, Range: 1 ~ 600
   growth-chamber-time: 60
 
+researches:
+  # Whether addon researches should be registered.
+  # Disable this to make addon items available without Slimefun research unlocks.
+  enabled: true
+
+chickens:
+  production:
+    # Per-chicken production overrides for the Excitation Chamber line.
+    # Use the chicken product key as the section name, for example:
+    # EXPERIENCE, DIAMOND, NETHERITE, WATER, LAVA, GOLD, IRON, LAPIS
+    #
+    # enabled:
+    #   Whether this chicken can produce anything in Excitation Chambers.
+    # output-amount:
+    #   How many items are produced each successful cycle.
+    # fail-rate:
+    #   Chance from 0-100 that this cycle produces a normal egg instead.
+    #   If omitted, the global options.resource-fail-rate is used.
+    # extra-time-seconds:
+    #   Flat seconds added after the normal chamber speed calculation.
+    # time-multiplier:
+    #   Multiplies the final cycle time after normal chamber speed calculation.
+    EXPERIENCE:
+      enabled: true
+      output-amount: 1
+      fail-rate: 0
+      extra-time-seconds: 0
+      time-multiplier: 1.0
+
 # The permission nodes are just here for reference. Changing them will not affect the plugin.
 commands:
   enabled: true
@@ -57,3 +94,9 @@ commands:
     calcchance:
       enabled: true
       permission: geneticchickengineering.command.calcchance
+    controlpanel:
+      enabled: true
+      permission: geneticchickengineering.command.controlpanel
+    reload:
+      enabled: true
+      permission: geneticchickengineering.command.reload

@@ -15,6 +15,7 @@ import io.github.thebusybiscuit.slimefun4.libraries.dough.updater.BlobBuildUpdat
 import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
 
 import net.guizhanss.gcereborn.core.commands.GCECommand;
+import net.guizhanss.gcereborn.core.gui.ChickenProductionControlPanel;
 import net.guizhanss.gcereborn.core.services.ConfigurationService;
 import net.guizhanss.gcereborn.core.services.IntegrationService;
 import net.guizhanss.gcereborn.core.services.LocalizationService;
@@ -67,6 +68,11 @@ public class GeneticChickengineering extends AbstractAddon {
     }
 
     @Override
+    protected void load() {
+        ConfigurationService.prepareConfig(this);
+    }
+
+    @Override
     public void enable() {
         File datadir = this.getDataFolder();
         if (!datadir.exists()) {
@@ -102,10 +108,15 @@ public class GeneticChickengineering extends AbstractAddon {
         Items.setup(this);
 
         // researches
-        log(Level.INFO, localization.getString("console.load.researches"));
-        Researches.setup();
+        if (configService.isResearchesEnabled()) {
+            log(Level.INFO, localization.getString("console.load.researches"));
+            Researches.setup();
+        } else {
+            log(Level.INFO, "Addon researches are disabled in config.yml, skipping research setup.");
+        }
 
         // listeners
+        getServer().getPluginManager().registerEvents(new ChickenProductionControlPanel(), this);
 
         // commands
         if (configService.isCommandsEnabled()) {

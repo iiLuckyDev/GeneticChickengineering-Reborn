@@ -23,3 +23,9 @@ permissions:
   geneticchickengineering.command.calcchance:
     description: Allows a player to calculate the chances of getting a specific offspring from two parents
     default: true
+  geneticchickengineering.command.controlpanel:
+    description: Allows a player to open the production control panel
+    default: op
+  geneticchickengineering.command.reload:
+    description: Allows a player to reload runtime-safe production settings
+    default: op

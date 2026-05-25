@@ -28,7 +28,7 @@ jobs:
         uses: WalshyDev/blob-builds/gh-action@main
         if: github.ref == 'refs/heads/master'
         with:
-          project: GeneticChickengineering-Reborn
+          project: SFRoyaleGeneticChickenEngineering
           releaseChannel: Dev
           apiToken: ${{ secrets.BLOB_BUILDS_API_TOKEN }}
           releaseNotes: ${{ github.event.head_commit.message }}
@@ -37,7 +37,7 @@ jobs:
         uses: WalshyDev/blob-builds/gh-action@main
         if: github.ref == 'refs/heads/experimental'
         with:
-          project: GeneticChickengineering-Reborn
+          project: SFRoyaleGeneticChickenEngineering
           releaseChannel: Experimental
           apiToken: ${{ secrets.BLOB_BUILDS_API_TOKEN }}
           releaseNotes: ${{ github.event.head_commit.message }}

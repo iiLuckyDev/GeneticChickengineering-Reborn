@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Chicken;
 import org.bukkit.inventory.ItemStack;
@@ -87,12 +88,10 @@ public final class ChickenUtils {
      */
     @Nonnull
     public static ItemStack capture(@Nonnull Chicken chicken) {
-        GeneticChickengineering.getIntegrationService().captureChicken(chicken);
         JsonObject json = PocketChicken.ADAPTER.saveData(chicken);
         ItemStack item = GCEItems.POCKET_CHICKEN.clone().item();
 
         DNA dna;
-        String uuid = chicken.getUniqueId().toString();
 
         if (PersistentDataAPI.hasString(chicken, Keys.CHICKEN_DNA)) {
             String dnaStr = PersistentDataAPI.getString(chicken, Keys.CHICKEN_DNA);
@@ -112,7 +111,7 @@ public final class ChickenUtils {
             }
             String replace = "(" + ChickenTypes.getDisplayName(dna.getTyping()) + ")";
             name = name.replace(replace, "");
-            if (name.isEmpty()) {
+            if (isBlankDisplayName(name)) {
                 json.addProperty("_customName", (String) null);
                 json.addProperty("_customNameVisible", false);
             } else {
@@ -120,6 +119,7 @@ public final class ChickenUtils {
             }
         }
 
+        GeneticChickengineering.getIntegrationService().captureChicken(chicken);
         setPocketChicken(item, json, dna);
         return item;
     }
@@ -249,6 +249,11 @@ public final class ChickenUtils {
         return lore;
     }
 
+    private static boolean isBlankDisplayName(@Nonnull String name) {
+        String plainName = ChatColor.stripColor(name);
+        return plainName == null || plainName.isBlank();
+    }
+
     public static void setPocketChicken(@Nonnull ItemStack item, @Nullable JsonObject json, @Nonnull DNA dna) {
         ItemMeta meta = item.getItemMeta();
         PersistentDataAPI.setIntArray(meta, Keys.POCKET_CHICKEN_DNA, dna.getState());
@@ -313,6 +318,12 @@ public final class ChickenUtils {
     public ItemStack getResource(@Nonnull ItemStack chicken) {
         DNA dna = getDNA(chicken);
         return ChickenTypes.getProduct(dna.getTyping());
+    }
+
+    @Nonnull
+    public String getChickenKey(@Nonnull ItemStack chicken) {
+        DNA dna = getDNA(chicken);
+        return ChickenTypes.getName(dna.getTyping());
     }
 
     /**

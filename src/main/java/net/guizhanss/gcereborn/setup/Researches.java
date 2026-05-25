@@ -1,8 +1,8 @@
 package net.guizhanss.gcereborn.setup;
 
-import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 
 import net.guizhanss.gcereborn.GeneticChickengineering;
 import net.guizhanss.gcereborn.items.GCEItems;
@@ -13,105 +13,45 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public final class Researches {
 
-    public static final Research ANIMAL_HUSBANDRY = new Research(
-        Keys.get("animal_husbandry"),
-        29841,
-        "Animal Husbandry",
-        8
-    );
-
-    public static final Research GENETIC_ANALYSIS = new Research(
-        Keys.get("genetic_analysis"),
-        29842,
-        "Genetic Analysis",
-        18
-    );
-
-    public static final Research SELECTIVE_BREEDING = new Research(
-        Keys.get("selective_breeding"),
-        29843,
-        "Selective Breeding",
-        24
-    );
-
-    public static final Research RESOURCE_STIMULATION = new Research(
-        Keys.get("resource_stimulation"),
-        29844,
-        "Resource Stimulation",
-        30
-    );
-
-    public static final Research INDUSTRIAL_STIMULATION = new Research(
-        Keys.get("industrial_stimulation"),
-        29845,
-        "Industrial Stimulation",
-        48
-    );
-
-    public static final Research NUCLEAR_STIMULATION = new Research(
-        Keys.get("nuclear_stimulation"),
-        29846,
-        "Nuclear Stimulation",
-        78
-    );
+    public static final Research CHICKEN_NET = create("chicken_net", 29841, "Chicken Net", 6);
+    public static final Research POCKET_CHICKEN = create("pocket_chicken", 29842, "Pocket Chicken", 8);
+    public static final Research GENETIC_SEQUENCER = create("genetic_sequencer", 29843, "Genetic Sequencer", 18);
+    public static final Research PRIVATE_COOP = create("private_coop", 29844, "Private Coop", 24);
+    public static final Research GROWTH_CHAMBER = create("growth_chamber", 29845, "Growth Chamber", 28);
+    public static final Research RESTORATION_CHAMBER = create("restoration_chamber", 29846, "Restoration Chamber", 28);
+    public static final Research WATER_EGG = create("water_egg", 29847, "Water Egg", 30);
+    public static final Research LAVA_EGG = create("lava_egg", 29848, "Lava Egg", 30);
+    public static final Research EXCITATION_CHAMBER = create("excitation_chamber", 29849, "Excitation Chamber", 36);
+    public static final Research EXCITATION_CHAMBER_2 = create("excitation_chamber_2", 29850, "Boosted Excitation Chamber", 48);
+    public static final Research EXCITATION_CHAMBER_3 = create("excitation_chamber_3", 29851, "Ultimate Excitation Chamber", 78);
 
     public static void setup() {
-        addItems(
-            ANIMAL_HUSBANDRY,
-            GCEItems.CHICKEN_NET,
-            GCEItems.POCKET_CHICKEN
-        );
-
-        addItems(
-            GENETIC_ANALYSIS,
-            GCEItems.GENETIC_SEQUENCER
-        );
-
-        addItems(
-            SELECTIVE_BREEDING,
-            GCEItems.PRIVATE_COOP
-        );
+        register(CHICKEN_NET, GCEItems.CHICKEN_NET);
+        register(POCKET_CHICKEN, GCEItems.POCKET_CHICKEN);
+        register(GENETIC_SEQUENCER, GCEItems.GENETIC_SEQUENCER);
+        register(PRIVATE_COOP, GCEItems.PRIVATE_COOP);
+        register(WATER_EGG, GCEItems.WATER_EGG);
+        register(LAVA_EGG, GCEItems.LAVA_EGG);
+        register(EXCITATION_CHAMBER, GCEItems.EXCITATION_CHAMBER);
+        register(EXCITATION_CHAMBER_2, GCEItems.EXCITATION_CHAMBER_2);
+        register(EXCITATION_CHAMBER_3, GCEItems.EXCITATION_CHAMBER_3);
 
         if (GeneticChickengineering.getConfigService().isGrowthChamberEnabled()) {
-            addItems(SELECTIVE_BREEDING, GCEItems.GROWTH_CHAMBER);
+            register(GROWTH_CHAMBER, GCEItems.GROWTH_CHAMBER);
         }
 
         if (GeneticChickengineering.getConfigService().isPainEnabled()) {
-            addItems(SELECTIVE_BREEDING, GCEItems.RESTORATION_CHAMBER);
+            register(RESTORATION_CHAMBER, GCEItems.RESTORATION_CHAMBER);
         }
-
-        addItems(
-            RESOURCE_STIMULATION,
-            GCEItems.WATER_EGG,
-            GCEItems.LAVA_EGG,
-            GCEItems.EXCITATION_CHAMBER
-        );
-
-        addItems(
-            INDUSTRIAL_STIMULATION,
-            GCEItems.EXCITATION_CHAMBER_2
-        );
-
-        addItems(
-            NUCLEAR_STIMULATION,
-            GCEItems.EXCITATION_CHAMBER_3
-        );
-
-        ANIMAL_HUSBANDRY.register();
-        GENETIC_ANALYSIS.register();
-        SELECTIVE_BREEDING.register();
-        RESOURCE_STIMULATION.register();
-        INDUSTRIAL_STIMULATION.register();
-        NUCLEAR_STIMULATION.register();
     }
 
-    private static void addItems(Research research, SlimefunItemStack... items) {
-        SlimefunItem[] slimefunItems = new SlimefunItem[items.length];
+    private static Research create(String key, int id, String name, int cost) {
+        return new Research(Keys.get(key), id, name, cost);
+    }
 
-        for (int i = 0; i < items.length; i++) {
-            slimefunItems[i] = items[i].getItem();
-        }
-
-        research.addItems(slimefunItems);
+    private static void register(Research research, SlimefunItemStack item) {
+        SlimefunItem slimefunItem = item.getItem();
+        research.addItems(slimefunItem);
+        research.register();
     }
 }

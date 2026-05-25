@@ -170,6 +170,10 @@ commands:
     description: "&fCalculate the chance of getting a chicken with the given 2 parent DNAs and child DNA."
   makechicken:
     description: "&fCreate a chicken item with the given DNA."
+  controlpanel:
+    description: "&fOpen the admin chicken production control panel."
+  reload:
+    description: "&fReload runtime-safe chicken production settings from config.yml."
 
 messages:
   no-permission: "&cYou do not have permission!"
@@ -177,3 +181,4 @@ messages:
   usage: "&bUsage: &e{0}"
   invalid-dna-notation: "&cInvalid DNA notation: {0}"
   chance-result: "&eThere is a &b{0}% &echance for parent 1 ({1}) and parent 2 ({2}) to have a child ({3})."
+  reload-production-settings: "&aReloaded runtime-safe chicken production settings. Slimefun registration settings still require a restart."

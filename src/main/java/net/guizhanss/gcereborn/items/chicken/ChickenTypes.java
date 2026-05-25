@@ -1,5 +1,6 @@
 package net.guizhanss.gcereborn.items.chicken;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -107,6 +108,11 @@ public final class ChickenTypes {
     @Nonnull
     public static ItemStack getProduct(int typing) {
         return TYPES.get(typing).getProduct();
+    }
+
+    @Nonnull
+    public static Map<Integer, ChickenProduct> getTypes() {
+        return Collections.unmodifiableMap(TYPES);
     }
 
     public static void registerChickens() {

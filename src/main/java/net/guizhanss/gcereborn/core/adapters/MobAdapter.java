@@ -76,7 +76,12 @@ public interface MobAdapter<T extends LivingEntity> extends PersistentDataType<S
         JsonObject attributes = json.getAsJsonObject("_attributes");
 
         for (Map.Entry<String, JsonElement> entry : attributes.entrySet()) {
-            AttributeInstance instance = entity.getAttribute(Attribute.valueOf(entry.getKey()));
+            Attribute attributeType = getAttribute(entry.getKey());
+            if (attributeType == null) {
+                continue;
+            }
+
+            AttributeInstance instance = entity.getAttribute(attributeType);
 
             if (instance != null) {
                 for (AttributeModifier modifier : new ArrayList<>(instance.getModifiers())) {
@@ -184,7 +189,7 @@ public interface MobAdapter<T extends LivingEntity> extends PersistentDataType<S
                 }
 
                 obj.add("modifiers", modifiers);
-                attributes.add(attribute.toString(), obj);
+                attributes.add(attribute.name(), obj);
             }
         }
 
@@ -215,6 +220,35 @@ public interface MobAdapter<T extends LivingEntity> extends PersistentDataType<S
         json.add("_scoreboardTags", tags);
 
         return json;
+    }
+
+    private static Attribute getAttribute(String key) {
+        try {
+            return Attribute.valueOf(key);
+        } catch (IllegalArgumentException ignored) {
+            String namespacedKey = getNamespacedKey(key);
+
+            for (Attribute attribute : Attribute.values()) {
+                if (attribute.getKey().toString().equalsIgnoreCase(namespacedKey)) {
+                    return attribute;
+                }
+            }
+
+            return null;
+        }
+    }
+
+    private static String getNamespacedKey(String key) {
+        int legacyKeyStart = key.indexOf("/ ");
+        if (legacyKeyStart >= 0) {
+            int keyStart = legacyKeyStart + 2;
+            int keyEnd = key.indexOf(']', keyStart);
+            if (keyEnd > keyStart) {
+                return key.substring(keyStart, keyEnd);
+            }
+        }
+
+        return key;
     }
 
 }

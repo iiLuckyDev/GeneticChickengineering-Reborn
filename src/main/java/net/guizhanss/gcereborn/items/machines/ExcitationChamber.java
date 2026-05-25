@@ -7,20 +7,17 @@ import javax.annotation.Nullable;
 
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.core.machines.MachineProcessor;
-import io.github.thebusybiscuit.slimefun4.implementation.operations.CraftingOperation;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.ItemUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineRecipe;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 
@@ -41,6 +38,43 @@ public class ExcitationChamber extends AbstractMachine {
     private static final int[] OUTPUT_BORDER = new int[] {27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 44};
     private static final int[] INPUT_SLOTS = new int[] {4};
     private static final int[] OUTPUT_SLOTS = new int[] {37, 38, 39, 40, 41, 42, 43};
+    private static final ItemStack STATUS_READY = CustomItemStack.create(Material.LIME_STAINED_GLASS_PANE, "&aReady");
+    private static final ItemStack STATUS_NEEDS_ADULT_CHICKEN = CustomItemStack.create(
+        Material.YELLOW_STAINED_GLASS_PANE,
+        "&eWaiting for an adult Pocket Chicken",
+        "",
+        "&7Put one adult Pocket Chicken in",
+        "&7the input slot above."
+    );
+    private static final ItemStack STATUS_BABY_CHICKEN = CustomItemStack.create(
+        Material.YELLOW_STAINED_GLASS_PANE,
+        "&eBaby Pocket Chicken detected",
+        "",
+        "&7Excitation Chambers only accept",
+        "&7adult Pocket Chickens.",
+        "",
+        "&7Use a Growth Chamber or wait for",
+        "&7the chicken to grow first."
+    );
+    private static final ItemStack STATUS_DISABLED = CustomItemStack.create(
+        Material.RED_STAINED_GLASS_PANE,
+        "&cChicken production disabled",
+        "",
+        "&7This chicken type is disabled in",
+        "&7the production config/control panel."
+    );
+    private static final ItemStack STATUS_OUTPUT_FULL = CustomItemStack.create(
+        Material.ORANGE_STAINED_GLASS_PANE,
+        "&6Output full",
+        "",
+        "&7Clear space in the output slots."
+    );
+    private static final ItemStack STATUS_CHICKEN_EXHAUSTED = CustomItemStack.create(
+        Material.RED_STAINED_GLASS_PANE,
+        "&cChicken exhausted",
+        "",
+        "&7Heal this chicken or enable pain kills."
+    );
 
     public ExcitationChamber(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -84,24 +118,30 @@ public class ExcitationChamber extends AbstractMachine {
     }
 
     @Override
-    protected void tick(@Nonnull Block b) {
-        super.tick(b);
-        BlockMenu inv = BlockStorage.getInventory(b);
-        MachineProcessor<CraftingOperation> processor = getMachineProcessor();
-        if (processor.getOperation(b) != null && findNextRecipe(inv) == null) {
-            processor.endOperation(b);
-            inv.replaceExistingItem(INFO_SLOT, GuiItems.BLACK_PANE);
-        }
-    }
-
-    @Override
     @Nullable
     protected MachineRecipe findNextRecipe(@Nonnull BlockMenu menu) {
         var config = GeneticChickengineering.getConfigService();
+        boolean foundChicken = false;
+        boolean foundBabyChicken = false;
+        boolean disabled = false;
+        boolean outputFull = false;
+        boolean exhausted = false;
+
         for (int slot : getInputSlots()) {
             ItemStack chicken = menu.getItemInSlot(slot);
 
-            if (!ChickenUtils.isPocketChicken(chicken) || !ChickenUtils.isAdult(chicken)) {
+            if (!ChickenUtils.isPocketChicken(chicken)) {
+                continue;
+            }
+            if (!ChickenUtils.isAdult(chicken)) {
+                foundBabyChicken = true;
+                continue;
+            }
+            foundChicken = true;
+
+            String chickenKey = ChickenUtils.getChickenKey(chicken);
+            if (!config.isChickenProductionEnabled(chickenKey)) {
+                disabled = true;
                 continue;
             }
 
@@ -110,10 +150,11 @@ public class ExcitationChamber extends AbstractMachine {
             ItemStack resourceIcon = ChickenUtils.getResource(chicken);
 
             ItemStack chickResource;
-            if (ThreadLocalRandom.current().nextInt(100) < config.getResourceFailRate()) {
+            if (ThreadLocalRandom.current().nextInt(100) < config.getChickenFailRate(chickenKey)) {
                 chickResource = new ItemStack(Material.EGG);
             } else {
                 chickResource = resourceIcon.clone();
+                chickResource.setAmount(Math.min(config.getChickenOutputAmount(chickenKey), chickResource.getMaxStackSize()));
             }
 
             /* Speed calculation
@@ -130,17 +171,21 @@ public class ExcitationChamber extends AbstractMachine {
              *  Tier 6 | 20 sec    | 10 sec
              */
             int speed = (config.getResourceBaseTime() + ChickenUtils.getResourceTier(chicken) - 2 * ChickenUtils.getDNAStrength(chicken)) / getSpeed();
+            speed += config.getChickenExtraTimeSeconds(chickenKey);
+            speed = Math.max(1, (int) Math.ceil(speed * config.getChickenTimeMultiplier(chickenKey)));
             MachineRecipe recipe = new MachineRecipe(
                 config.isTest() ? 1 : speed,
                 new ItemStack[] {chicken},
                 new ItemStack[] {chickResource}
             );
             if (!InvUtils.fitAll(menu.toInventory(), recipe.getOutput(), getOutputSlots())) {
+                outputFull = true;
                 continue;
             }
 
             if (config.isPainEnabled()) {
                 if (!ChickenUtils.survivesPain(chicken) && !config.isPainDeathEnabled()) {
+                    exhausted = true;
                     continue;
                 }
                 ChickenUtils.possiblyHarm(chicken);
@@ -153,10 +198,33 @@ public class ExcitationChamber extends AbstractMachine {
                 }
             }
 
+            menu.replaceExistingItem(INFO_SLOT, STATUS_READY);
             return recipe;
         }
 
+        updateStatus(menu, foundChicken, foundBabyChicken, disabled, outputFull, exhausted);
         return null;
+    }
+
+    private static void updateStatus(
+        @Nonnull BlockMenu menu,
+        boolean foundChicken,
+        boolean foundBabyChicken,
+        boolean disabled,
+        boolean outputFull,
+        boolean exhausted
+    ) {
+        if (!foundChicken) {
+            menu.replaceExistingItem(INFO_SLOT, foundBabyChicken ? STATUS_BABY_CHICKEN : STATUS_NEEDS_ADULT_CHICKEN);
+        } else if (disabled) {
+            menu.replaceExistingItem(INFO_SLOT, STATUS_DISABLED);
+        } else if (outputFull) {
+            menu.replaceExistingItem(INFO_SLOT, STATUS_OUTPUT_FULL);
+        } else if (exhausted) {
+            menu.replaceExistingItem(INFO_SLOT, STATUS_CHICKEN_EXHAUSTED);
+        } else {
+            menu.replaceExistingItem(INFO_SLOT, GuiItems.BLACK_PANE);
+        }
     }
 
 }
